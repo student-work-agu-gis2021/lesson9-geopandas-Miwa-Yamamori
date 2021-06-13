@@ -1,0 +1,2 @@
+language = "python3"
+run = "python Exercise_9_problem_1.py;python Exercise_9_problem_2.py;python Exercise_9_problem_3.py;"
