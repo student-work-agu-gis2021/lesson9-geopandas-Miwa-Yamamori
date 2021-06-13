@@ -9,12 +9,17 @@
 # YOUR CODE HERE 1 to read data
 import geopandas as gpd
 from pyproj import CRS
-data=None
+# Read the file
+data = gpd.read_file('Kruger_posts.shp')
+#print(data)
 
 # - Check the crs of the input data. If this information is missing, set it as epsg:4326 (WGS84).
 # - Reproject the data from WGS84 to `EPSG:32735` -projection which stands for UTM Zone 35S (UTM zone for South Africa) to transform the data into metric system. (don't create a new variable, update the existing variable `data`!)"
 
 # YOUR CODE HERE 2 to set crs
+# Reproject the data to 32735 from WGS84
+data = data.to_crs(epsg = 32735)
+#print("data crs: ", data.crs)
 
 # CODE FOR TESTING YOUR SOLUTION
 
@@ -29,8 +34,10 @@ print(data.crs)
 
 #  - Group the data by userid
 
-#  YOUR CODE HERE 3 to group 
-grouped=None
+#  YOUR CODE HERE 3 to group
+# Make groups grouped by userid
+grouped = data.groupby('userid')
+#print("len: ", len(grouped))
 
 # CODE FOR TESTING YOUR SOLUTION
 
@@ -44,7 +51,30 @@ assert len(grouped.groups) == data["userid"].nunique(), "Number of groups should
 # YOUR CODE HERE 4 to set movements
 import pandas as pd
 from shapely.geometry import LineString, Point
-movements=None
+
+# Create an empty GeoDataFrame
+movements = gpd.GeoDataFrame()
+# Create an empty column
+movements['geometry'] = None
+
+index = 0
+# For each group
+for key, group in grouped:
+  # Sort them by timestamp
+  group = group.sort_values('timestamp')
+  ### I could not assing the LineString well
+  ### LineString required list as the argument,
+  ### so I prepared temp_list, but got some error
+  temp_list = list(group['geometry'])
+  line = LineString(temp_list)
+
+  movements.at[index, 'useid'] = key
+  movements.at[index, 'geometry'] = line
+  index = index + 1
+
+# Set 32735 as the crs
+movements.crs = CRS.from_epsg(32735)
+
 # CODE FOR TESTING YOUR SOLUTION
 
 #Check the result
@@ -58,6 +88,9 @@ print(movements["geometry"].head())
 # - Calculate the lenghts of the lines into a new column called ``distance`` in ``movements`` GeoDataFrame.
 
 # YOUR CODE HERE 5 to calculate distance
+movements['distance'] = None
+for each in movements['geometry']:
+  movements['distance'].append(each.length)
 
 # CODE FOR TESTING YOUR SOLUTION
 
@@ -72,10 +105,15 @@ movements.head()
 #  - What was the maximum distance travelled in meters?
 
 # YOUR CODE HERE 6 to find max, min,mean of the distance.
+dis_max = round(movements['distance'].max(), 2)
+dis_min = round(movements['distance'].min(), 2)
+dis_mean = round(movements['distance'].mean(), 2)
 
 # - Finally, save the movements of into a Shapefile called ``some_movements.shp``
 
 # YOUR CODE HERE 7 to save as Shapefile
+fp = 'some_movements.shp'
+movements.to_file(fp)
 
 # CODE FOR TESTING YOUR SOLUTION
 

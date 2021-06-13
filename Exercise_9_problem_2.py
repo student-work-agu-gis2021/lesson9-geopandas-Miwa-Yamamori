@@ -11,8 +11,18 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Point
 # YOUR CODE HERE 1 to read data
-data = None
+# Read the CSV file
+data = pd.read_csv('data/some_posts.csv')
 
+# Create an empty column
+data['geometry'] = None
+# Create coords to store the lons and lats
+coords = []
+for i in range(len(data)):
+  # Set the lats and lons to the coords
+  coords.append([data['lat'][i], data['lon'][i]])
+# Update geometry with the coords
+data['geometry'] = coords
 
 # CODE FOR TESTING YOUR SOLUTION
 
@@ -31,7 +41,35 @@ import geopandas as gpd
 from pyproj import CRS
 
 # Convert DataFrame into a GeoDataFrame
-geo=None
+# Create an empty GeoDataFrame
+geo = gpd.GeoDataFrame()
+
+# Create an empty list
+points = []
+for i in range(len(data)):
+  # Store each coordinate to the points
+  points.append(Point(data['geometry'][i]))
+
+# Update geo
+geo['geometry'] = points
+
+# For problem 3, we need useid and timestanp
+data_geo_useid = gpd.GeoDataFrame(data['userid'])
+data_geo_ts = gpd.GeoDataFrame(data['timestamp'])
+
+geo['userid'] = data_geo_useid
+geo['timestamp'] = data_geo_ts
+
+#print(geo)
+
+# Set the crs as 4326
+geo.crs = CRS.from_epsg(4326).to_wkt()
+
+# Specify the file path
+fp = 'Kruger_posts.shp'
+# Save the data
+geo.to_file(fp)
+
 # CODE FOR TESTING YOUR SOLUTION
 
 # Check the geodataframe head
@@ -50,6 +88,7 @@ assert os.path.isfile(fp), "output shapefile does not exist"
 # - **Create a simple map of the points** using the `plot()` -funtion. 
 
 # YOUR CODE HERE 3
+geo.plot()
 
 # Well done! Now you can move on to Exercise_9_problem_3.
 
