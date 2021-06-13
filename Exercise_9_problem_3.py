@@ -63,9 +63,9 @@ for key, group in grouped:
   # Sort them by timestamp
   group = group.sort_values('timestamp')
   ### I could not assing the LineString well
-  ### LineString required list as the argument,
-  ### so I prepared temp_list, but got some error
-  temp_list = list(group['geometry'])
+  ### LineString required at least two coordinates.
+  ### I could not find the way to store the two coords of a user
+  temp_list = [group['geometry'][0], group['geometry'][1]]
   line = LineString(temp_list)
 
   movements.at[index, 'useid'] = key
